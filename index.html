@@ -1,0 +1,1047 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b19">
+<title>Our Cozy Corner</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<style>
+:root{
+ --bg:#090b19;--panel:#11172a;--panel2:#191e35;
+ --border:#bdc8ff20;--text:#f4f1ff;--muted:#999db8;
+ --purple:#b49aff;--blue:#83d9ff;--pink:#f39bd4;
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{
+ color:var(--text);font-family:Inter,"Segoe UI",Arial,sans-serif;
+ background:
+ radial-gradient(ellipse at 10% 10%,#6846ba38,transparent 38%),
+ radial-gradient(ellipse at 90% 85%,#176b9850,transparent 42%),
+ radial-gradient(ellipse at 65% 0%,#bd579329,transparent 35%),
+ linear-gradient(135deg,#080a17,#0d1222 55%,#090b19);
+}
+body:before{
+ content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;
+ background-image:linear-gradient(#a9baff0b 1px,transparent 1px),
+ linear-gradient(90deg,#a9baff0b 1px,transparent 1px);
+ background-size:54px 54px;
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer;color:inherit}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+/* LOGIN */
+#login{
+ position:fixed;inset:0;z-index:5;display:flex;
+ align-items:center;justify-content:center;padding:22px;
+}
+.login-card{
+ width:100%;max-width:420px;padding:42px 36px;
+ border:1px solid #b9c8ff2b;border-radius:25px;
+ background:linear-gradient(145deg,#1a1d35f5,#0e1324f7);
+ box-shadow:0 30px 100px #000a,0 0 55px #8564d222;
+ backdrop-filter:blur(22px);
+}
+.brand{font-size:10px;letter-spacing:5px;font-weight:750;color:#d0bdff;margin-bottom:40px}
+.login-card h1{font-size:32px;letter-spacing:-.9px;font-weight:550;margin:0 0 10px}
+.subtitle{color:#aaaec8;font-size:13px;margin-bottom:35px;line-height:1.7}
+.field-label{display:block;color:#c2bdd9;font-size:10px;letter-spacing:1.8px;margin-bottom:10px}
+#pass{
+ width:100%;background:#090e1d;border:1px solid #b9c8ff2c;
+ border-radius:12px;padding:16px;color:white;outline:none;
+ letter-spacing:12px;font-size:22px;text-align:center;
+}
+#pass:focus{border-color:var(--purple);box-shadow:0 0 0 3px #a88bff1c}
+.primary{
+ width:100%;margin-top:18px;padding:15px;border-radius:12px;
+ background:linear-gradient(105deg,#6256b9,#8270d9 48%,#b875b9);
+ font-weight:650;border:1px solid #ffffff20;color:white;
+}
+#error{height:18px;color:#ff91b4;font-size:12px;margin:10px 0 0}
+.login-foot{color:#8185a3;font-size:9px;letter-spacing:1.5px;text-align:center;margin-top:28px}
+
+/* APP LAYOUT */
+body.app-open{display:flex;align-items:center;justify-content:center}
+#app{
+ display:none;position:relative;z-index:1;
+ width:min(100%,1280px);height:min(100dvh,900px);
+ min-height:0;grid-template-columns:250px minmax(0,1fr);
+ background:#0d1222ee;border:1px solid var(--border);
+ box-shadow:0 20px 100px #0007;overflow:hidden;
+}
+.sidebar{
+ min-width:0;min-height:0;background:linear-gradient(180deg,#12172a,#0e1323);
+ border-right:1px solid var(--border);display:flex;flex-direction:column;
+}
+.side-brand{padding:27px 20px;font-size:10px;letter-spacing:3px;color:#cbb8ff;border-bottom:1px solid var(--border)}
+.side-section{padding:26px 18px 10px;color:#858ba9;font-size:9px;letter-spacing:2px}
+.person{
+ margin:8px 12px;padding:12px;display:flex;gap:12px;align-items:center;
+ border-radius:13px;background:#ffffff07;border:1px solid #b9c8ff12;
+}
+.avatar{
+ width:41px;height:41px;border-radius:50%;
+ background:linear-gradient(135deg,#9278e2,#327b9b);
+ display:flex;justify-content:center;align-items:center;overflow:hidden;
+ flex-shrink:0;font-size:14px;font-weight:600;color:white;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.person-info{min-width:0;flex:1}
+.person-info strong{font-size:13px;font-weight:600}
+.person-info small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.side-bottom{margin-top:auto;padding:15px;border-top:1px solid var(--border)}
+.side-bottom button{
+ display:block;width:100%;background:transparent;color:var(--muted);
+ text-align:left;padding:11px;border-radius:9px;font-size:12px;border:0;
+}
+.side-bottom button:hover{background:#ffffff0b;color:white}
+
+/* CHAT */
+.chat{min-width:0;min-height:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+ height:72px;min-height:72px;flex-shrink:0;
+ display:flex;align-items:center;gap:13px;padding:0 23px;
+ border-bottom:1px solid var(--border);background:#11172bea;
+}
+.top-title{flex:1;min-width:0}
+.top-title strong{font-size:14px;font-weight:600}
+.top-title small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+.top-actions{display:flex;gap:8px}
+.icon-btn{
+ background:#ffffff09;border:1px solid var(--border);
+ width:37px;height:37px;border-radius:10px;color:#d0cbe5;
+}
+.icon-btn:hover{background:#ffffff16;border-color:#b59aff66}
+
+/* SCROLLING */
+#messages{
+ flex:1 1 0;min-height:0;min-width:0;
+ overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+ padding:23px clamp(12px,4vw,55px);
+ display:flex;flex-direction:column;gap:10px;
+}
+#messages::-webkit-scrollbar{width:5px}
+#messages::-webkit-scrollbar-thumb{background:#b9c8ff30;border-radius:10px}
+.date-separator{
+ align-self:center;flex-shrink:0;margin:15px 0;padding:7px 14px;
+ border:1px solid var(--border);border-radius:20px;
+ background:#ffffff09;color:#b3b6d0;font-size:10px;
+}
+.message{
+ position:relative;flex-shrink:0;max-width:min(75%,560px);min-width:80px;
+ padding:12px 14px 9px;border:1px solid #c0caff1c;
+ border-radius:16px;background:linear-gradient(145deg,#1b2540,#171b30);
+ align-self:flex-start;overflow-wrap:anywhere;box-shadow:0 7px 24px #0003;
+}
+.message.mine{align-self:flex-end;background:linear-gradient(145deg,#443d70,#30334f);border-color:#b09bff45}
+.message-author{font-size:10px;font-weight:650;color:#c5aaff;margin-bottom:7px}
+.message-content{font-size:13.5px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.message img,.message video{
+ display:block;width:auto;max-width:100%;max-height:350px;
+ object-fit:contain;border-radius:11px;margin-top:9px;background:#080b17;
+}
+.message video{width:100%}
+.media-fallback{
+ display:block;margin-top:9px;padding:12px;border:1px solid #ff9bb755;
+ border-radius:9px;color:#ffd0df;font-size:11px;
+}
+.message-meta{display:flex;justify-content:flex-end;gap:6px;align-items:center;margin-top:9px;font-size:10px;color:#aaaec7}
+.ticks{letter-spacing:-2px;font-size:12px}
+.ticks.seen{color:var(--blue)}
+.reply-preview{border-left:2px solid var(--pink);padding:8px 10px;background:#0003;color:#d3c4e8;border-radius:4px;margin-bottom:9px;font-size:11px}
+.message-actions{display:flex;gap:5px;justify-content:flex-end;margin-top:7px;flex-wrap:wrap}
+.message-actions button{border:0;background:transparent;color:#c8c1dc;font-size:10px;padding:5px 8px;border-radius:6px}
+.message-actions button:hover{background:#ffffff12}
+.reaction-panel{display:none;gap:5px;flex-wrap:wrap;justify-content:flex-end;padding-top:7px}
+.reaction-panel.open{display:flex}
+.reaction-panel button{border:1px solid #ffffff20;background:#111323;border-radius:20px;padding:6px 9px;font-size:17px}
+.reaction-panel button:hover{background:#35304f;border-color:#ad91ff}
+.reaction-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.reaction-chip{border:1px solid #ffffff20;background:#17182a;border-radius:18px;padding:4px 8px;font-size:11px;color:#eee8fa}
+.reaction-chip.mine{border-color:#b69aff;background:#514477}
+.reaction-chip span{margin-left:4px;color:#c9c2dc}
+.deleted-message{font-size:12px;font-style:italic;color:#b3aec7;padding:3px 0}
+
+/* STATUS */
+#typing{min-height:0;flex-shrink:0;padding:0 25px;background:#11172a;color:var(--purple);font-size:10px}
+#typing:not(:empty){min-height:21px;padding-top:3px}
+#uploadStatus{
+ display:none;flex-shrink:0;padding:7px 20px;
+ background:#11172a;color:#bba9ff;font-size:11px;
+}
+#uploadStatus.visible{display:block}
+#uploadStatus.error{color:#ff9bb7}
+
+/* COMPOSER */
+.reply-bar{
+ display:none;flex-shrink:0;align-items:center;gap:12px;
+ padding:9px 20px;background:#1a1b32;border-top:1px solid var(--border);
+ color:#d1baff;font-size:11px;
+}
+.reply-bar span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reply-bar button{border:0;background:transparent;color:#c4b2e9}
+.composer-wrap{
+ flex-shrink:0;padding:12px 20px max(14px,env(safe-area-inset-bottom));
+ background:#11172a;border-top:1px solid var(--border);
+}
+.tools{display:flex;align-items:center;gap:7px;margin-bottom:9px;flex-wrap:wrap}
+.tools button{
+ background:#ffffff08;border:1px solid var(--border);
+ color:#c2bdd7;padding:7px 11px;border-radius:8px;font-size:11px;
+}
+.tools button:hover{background:#ffffff14;color:white}
+.composer{display:flex;gap:10px;align-items:flex-end;min-width:0}
+#messageInput{
+ flex:1;min-width:0;resize:none;min-height:45px;max-height:140px;
+ padding:13px 15px;border-radius:13px;background:#1a2036;
+ border:1px solid #c0caff20;outline:none;color:white;
+ font-size:13px;line-height:1.5;overflow-y:auto;
+}
+#messageInput:focus{border-color:#9b84e6}
+#messageInput::placeholder{color:#858ba8}
+#sendBtn{
+ flex-shrink:0;width:46px;height:46px;border-radius:13px;
+ border:1px solid #ffffff20;
+ background:linear-gradient(135deg,#6c65c9,#a27bdb,#ce83b8);
+ font-size:19px;color:white;
+}
+
+/* PROFILE */
+#profileModal{
+ position:fixed;inset:0;display:none;align-items:center;
+ justify-content:center;padding:20px;background:#050611d9;
+ backdrop-filter:blur(9px);z-index:10;overflow-y:auto;
+}
+.profile-card{
+ width:100%;max-width:380px;padding:26px;border-radius:19px;
+ border:1px solid #c0caff25;background:linear-gradient(145deg,#202640,#14192b);
+ box-shadow:0 25px 80px #0009;
+}
+.profile-card h2{font-size:18px;margin:0 0 22px}
+.profile-card label{display:block;font-size:11px;color:var(--muted);margin:14px 0 7px}
+.profile-card input[type="text"]{
+ width:100%;background:#090e1b;border:1px solid var(--border);
+ border-radius:9px;padding:12px;color:white;outline:none;
+}
+.profile-buttons{display:flex;gap:9px;margin-top:20px}
+.profile-buttons button{flex:1;padding:11px;border-radius:9px;border:0}
+.save{background:linear-gradient(110deg,#7565c7,#b078c6)}
+.cancel{background:#ffffff12}
+.note{font-size:10px;color:var(--muted);line-height:1.6;margin-top:12px}
+.upload-status{font-size:10px;color:var(--purple);margin-top:10px;min-height:15px}
+.empty-state{margin:auto;text-align:center;color:var(--muted);font-size:13px;line-height:2;padding:25px 10px}
+.empty-state strong{display:block;color:#e2dcf2;font-size:16px;font-weight:500}
+
+/* MOBILE */
+@media(max-width:760px){
+ body.app-open{display:block}
+ #app{width:100%;height:100dvh;min-height:0;border:0;grid-template-columns:minmax(0,1fr);box-shadow:none}
+ .sidebar{display:none}
+ .chat{height:100%;min-height:0}
+ .topbar{height:64px;min-height:64px;padding:0 13px}
+ #messages{padding:16px 12px;gap:9px}
+ .message{max-width:88%;padding:11px 12px 8px}
+ .message img,.message video{max-height:290px}
+ .composer-wrap{padding:9px 10px max(10px,env(safe-area-inset-bottom))}
+ .tools{margin-bottom:8px}
+ .tools button{padding:7px 9px}
+ #typing{padding-left:14px}
+ #uploadStatus{padding-left:14px}
+ .reply-bar{padding:9px 12px}
+}
+@media(max-width:380px){
+ .top-actions{gap:5px}
+ .icon-btn{width:34px;height:34px}
+ .message{max-width:92%}
+ .tools button{font-size:10px}
+ .login-card{padding:32px 23px}
+}
+</style>
+</head>
+
+<body>
+
+<section id="login">
+ <div class="login-card">
+  <div class="brand">OUR COZY CORNER</div>
+  <h1>Welcome back.</h1>
+  <div class="subtitle">Your own little space. Just the two of us.</div>
+  <label class="field-label" for="pass">ENTER THE PASSCODE</label>
+  <input id="pass" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="off">
+  <p id="error"></p>
+  <button class="primary" onclick="login()">Continue</button>
+  <div class="login-foot">A LITTLE SPACE, JUST FOR US.</div>
+ </div>
+</section>
+
+<section id="app">
+ <aside class="sidebar">
+  <div class="side-brand">OUR COZY CORNER</div>
+  <div class="side-section">YOUR SPACE</div>
+  <div class="person">
+   <div class="avatar" id="sideAvatar">B</div>
+   <div class="person-info"><strong id="sideName">Black Cat</strong><small>Your account</small></div>
+  </div>
+  <div class="person">
+   <div class="avatar" id="partnerAvatar">W</div>
+   <div class="person-info"><strong id="partnerName">Wolf</strong><small>Our conversation</small></div>
+  </div>
+  <div class="side-bottom">
+   <button onclick="editProfile()">Edit profile</button>
+   <button onclick="logout()">Sign out</button>
+  </div>
+ </aside>
+
+ <main class="chat">
+  <header class="topbar">
+   <div class="avatar" id="topAvatar">W</div>
+   <div class="top-title">
+    <strong id="chatTitle">Conversation</strong>
+    <small>Just the two of us</small>
+   </div>
+   <div class="top-actions">
+    <button class="icon-btn" onclick="editProfile()" title="Edit profile">✎</button>
+    <button class="icon-btn" onclick="logout()" title="Sign out">↗</button>
+   </div>
+  </header>
+
+  <div id="messages"></div>
+  <div id="typing"></div>
+  <div id="uploadStatus" aria-live="polite"></div>
+
+  <div class="reply-bar" id="replyBar">
+   <span id="replyText"></span>
+   <button onclick="cancelReply()">Cancel ✕</button>
+  </div>
+
+  <div class="composer-wrap">
+   <div class="tools">
+    <button onclick="document.getElementById('fileInput').click()">＋ Attach media</button>
+    <button onclick="insertText('❤️')">♡ Heart</button>
+    <input type="file" id="fileInput" accept="image/*,video/*" hidden onchange="uploadMedia(this.files[0])">
+   </div>
+   <div class="composer">
+    <textarea id="messageInput" rows="1" placeholder="Write a message..."></textarea>
+    <button id="sendBtn" onclick="sendMessage()">↑</button>
+   </div>
+  </div>
+ </main>
+</section>
+
+<div id="profileModal">
+ <div class="profile-card">
+  <h2>Profile settings</h2>
+  <label>Display name</label>
+  <input type="text" id="profileName" maxlength="40" placeholder="Your name">
+  <label>Profile picture</label>
+  <div style="display:flex;align-items:center;gap:12px">
+   <div class="avatar" id="profilePreview" style="width:58px;height:58px">?</div>
+   <button class="tools" style="margin:0" onclick="document.getElementById('pfpInput').click()">Choose from device</button>
+  </div>
+  <input type="file" id="pfpInput" accept="image/*" hidden onchange="uploadProfilePicture(this.files[0])">
+  <div class="upload-status" id="profileUploadStatus"></div>
+  <div class="note">Choose a photo from your phone gallery or laptop.</div>
+  <div class="profile-buttons">
+   <button class="save" onclick="saveProfile()">Save changes</button>
+   <button class="cancel" onclick="closeProfile()">Cancel</button>
+  </div>
+ </div>
+</div>
+
+<script>
+/* FIREBASE CONFIGURATION */
+const firebaseConfig={
+ apiKey:"AIzaSyDNgdttTOYuHbduohzwdxAUpOKbyHlmB-A",
+ authDomain:"wolf-and-cat-chat.firebaseapp.com",
+ databaseURL:"https://wolf-and-cat-chat-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"wolf-and-cat-chat",
+ storageBucket:"wolf-and-cat-chat.firebasestorage.app",
+ messagingSenderId:"445164841664",
+ appId:"1:445164841664:web:b83a55075c20c148dddb25"
+};
+
+if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+
+const db=firebase.database();
+const root=db.ref("cozyCorner");
+const messagesRef=root.child("messages");
+const profilesRef=root.child("profiles");
+const PASSCODES={cat:"0216",wolf:"1602"};
+const LABELS={cat:"Black Cat",wolf:"Wolf"};
+const REACTIONS=["❤️","😂","😮","😢","👍","🔥"];
+
+let me=null,partner=null,profiles={};
+let replyTo=null,typingTimer=null,currentMessages={};
+let profileImageURL=null;
+
+/* LOGIN */
+function login(){
+ const pass=document.getElementById("pass").value;
+ const error=document.getElementById("error");
+
+ if(pass===PASSCODES.cat)me="cat";
+ else if(pass===PASSCODES.wolf)me="wolf";
+ else{
+  error.textContent="That passcode doesn't look right. Try again.";
+  document.getElementById("pass").value="";
+  return;
+ }
+
+ partner=me==="cat"?"wolf":"cat";
+ sessionStorage.setItem("cozyIdentity",me);
+ openChat();
+}
+
+function logout(){
+ sessionStorage.removeItem("cozyIdentity");
+ location.reload();
+}
+
+function openChat(){
+ document.body.classList.add("app-open");
+ document.getElementById("login").style.display="none";
+ document.getElementById("app").style.display="grid";
+
+ profilesRef.off("value");
+ profilesRef.on("value",s=>{
+  profiles=s.val()||{};
+  updateProfiles();
+ },e=>showUploadStatus("Profile loading failed: "+e.message,true));
+
+ listenMessages();
+ listenTyping();
+}
+
+/* PROFILE DISPLAY */
+function updateProfiles(){
+ const own=profiles[me]||{};
+ const other=profiles[partner]||{};
+ const myName=own.name||LABELS[me];
+ const otherName=other.name||LABELS[partner];
+
+ document.getElementById("sideName").textContent=myName;
+ document.getElementById("chatTitle").textContent=otherName;
+ document.getElementById("partnerName").textContent=otherName;
+
+ setAvatar("sideAvatar",own.pic,myName);
+ setAvatar("topAvatar",other.pic,otherName);
+ setAvatar("partnerAvatar",other.pic,otherName);
+}
+
+function setAvatar(id,url,name){
+ const el=document.getElementById(id);
+ el.replaceChildren();
+
+ if(url){
+  const img=document.createElement("img");
+  img.src=url;img.alt="Profile";
+  el.appendChild(img);
+ }else{
+  el.textContent=(name||"?").trim().charAt(0).toUpperCase();
+ }
+}
+
+/* MESSAGES: FULL COLLECTION LISTENER */
+function listenMessages(){
+ messagesRef.off("value");
+
+ messagesRef.on("value",snapshot=>{
+  const box=document.getElementById("messages");
+  const nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<160;
+
+  currentMessages={};
+
+  snapshot.forEach(s=>{
+   const value=s.val();
+   if(value&&typeof value==="object")currentMessages[s.key]=value;
+  });
+
+  renderMessages();
+
+  if(nearBottom)requestAnimationFrame(()=>box.scrollTop=box.scrollHeight);
+
+  snapshot.forEach(s=>{
+   const m=s.val();
+
+   // Never write read receipts for deleted messages.
+   if(m&&!m.deleted&&m.sender!==me&&!(m.seenBy&&m.seenBy[me])){
+    messagesRef.child(s.key+"/seenBy/"+me).set(true)
+     .catch(e=>console.warn("Read receipt failed:",e));
+   }
+  });
+ },error=>{
+  showUploadStatus("Couldn't load messages: "+error.message,true);
+ });
+}
+
+/* MEDIA AND TIME HELPERS */
+function getMediaUrl(m){
+ const candidates=[
+  m.media,m.mediaUrl,m.imageUrl,m.videoUrl,
+  m.url,m.secure_url,m.fileUrl,m.attachment
+ ];
+
+ for(const item of candidates){
+  if(typeof item==="string"&&/^https?:\/\//i.test(item))return item;
+  if(item&&typeof item==="object"){
+   const nested=item.url||item.secure_url||item.src;
+   if(typeof nested==="string"&&/^https?:\/\//i.test(nested))return nested;
+  }
+ }
+ return "";
+}
+
+function getMediaKind(m,url){
+ const declared=String(m.mediaType||m.type||m.resource_type||"").toLowerCase();
+ if(declared.includes("video"))return "video";
+ if(declared.includes("image"))return "image";
+ if(/\/video\/upload\//i.test(url)||/\.(mp4|webm|mov|m4v)(\?|$)/i.test(url))return "video";
+ return "image";
+}
+
+function getTimestamp(m){
+ const value=m.time??m.timestamp??m.createdAt??0;
+ if(typeof value==="number")return value;
+ if(value&&typeof value==="object"&&value[".sv"])return Date.now();
+ const parsed=Date.parse(value);
+ return Number.isFinite(parsed)?parsed:0;
+}
+
+/* RENDER */
+function renderMessages(){
+ const box=document.getElementById("messages");
+ box.replaceChildren();
+
+ const entries=Object.entries(currentMessages)
+  .sort((a,b)=>getTimestamp(a[1])-getTimestamp(b[1]));
+
+ if(!entries.length){
+  const empty=document.createElement("div");
+  empty.className="empty-state";
+  const heading=document.createElement("strong");
+  heading.textContent="Your space, your conversations.";
+  empty.append(heading,document.createTextNode("Messages will appear here."));
+  box.appendChild(empty);
+  return;
+ }
+
+ let previousDay="";
+
+ entries.forEach(([id,m])=>{
+  if(!m)return;
+
+  const d=new Date(getTimestamp(m)||Date.now());
+  const day=d.toLocaleDateString("en-IN",{
+   timeZone:"Asia/Kolkata",day:"numeric",month:"long",year:"numeric"
+  });
+
+  if(day!==previousDay){
+   const sep=document.createElement("div");
+   sep.className="date-separator";
+
+   const today=new Date().toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"});
+   const yesterday=new Date(Date.now()-86400000).toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"});
+   const current=d.toLocaleDateString("en-IN",{timeZone:"Asia/Kolkata"});
+
+   sep.textContent=current===today?"Today":current===yesterday?"Yesterday":day;
+   box.appendChild(sep);
+   previousDay=day;
+  }
+
+  box.appendChild(createMessage(id,m,d));
+ });
+}
+
+function createMessage(id,m,d){
+ const el=document.createElement("div");
+ el.className="message"+(m.sender===me?" mine":"");
+
+ const author=document.createElement("div");
+ author.className="message-author";
+ author.textContent=(profiles[m.sender]&&profiles[m.sender].name)||LABELS[m.sender]||"Member";
+ el.appendChild(author);
+
+ /* DELETED MESSAGE DISPLAY */
+ if(m.deleted){
+  const deleted=document.createElement("div");
+  deleted.className="deleted-message";
+  deleted.textContent="This message was deleted.";
+  el.appendChild(deleted);
+
+  const deletedTime=document.createElement("div");
+  deletedTime.className="message-meta";
+  deletedTime.textContent=d.getTime()?d.toLocaleTimeString("en-IN",{
+   timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit"
+  }):"";
+  el.appendChild(deletedTime);
+  return el;
+ }
+
+ if(m.reply){
+  const quote=document.createElement("div");
+  quote.className="reply-preview";
+  quote.textContent="Replying to: "+(m.reply.text||"Attachment");
+  el.appendChild(quote);
+ }
+
+ if(m.text){
+  const body=document.createElement("div");
+  body.className="message-content";
+  body.textContent=m.text;
+  el.appendChild(body);
+ }
+
+ const mediaUrl=getMediaUrl(m);
+ const meta=document.createElement("div");
+ meta.className="message-meta";
+
+ if(mediaUrl){
+  const kind=getMediaKind(m,mediaUrl);
+  const media=document.createElement(kind==="video"?"video":"img");
+
+  if(kind==="video"){
+   media.controls=true;media.playsInline=true;media.preload="metadata";
+  }else{
+   media.loading="lazy";media.alt="Shared image";media.decoding="async";
+  }
+
+  media.src=mediaUrl;
+  media.onerror=()=>{
+   if(!el.querySelector(".media-fallback")){
+    const link=document.createElement("a");
+    link.className="media-fallback";
+    link.href=mediaUrl;link.target="_blank";link.rel="noopener";
+    link.textContent="Media preview unavailable — open file";
+    el.insertBefore(link,meta);
+   }
+   media.style.display="none";
+  };
+  el.appendChild(media);
+ }
+
+ const time=document.createElement("span");
+ time.textContent=d.getTime()?d.toLocaleTimeString("en-IN",{
+  timeZone:"Asia/Kolkata",hour:"2-digit",minute:"2-digit"
+ }):"";
+ meta.appendChild(time);
+
+ if(m.sender===me){
+  const ticks=document.createElement("span");
+  ticks.className="ticks"+(m.seenBy&&m.seenBy[partner]?" seen":"");
+  ticks.textContent=m.seenBy&&m.seenBy[partner]?"✓✓":"✓";
+  meta.appendChild(ticks);
+ }
+ el.appendChild(meta);
+
+ /* REACTIONS */
+ const reactions=m.reactions||{};
+ const counts={};
+
+ Object.values(reactions).forEach(emoji=>{
+  if(emoji)counts[emoji]=(counts[emoji]||0)+1;
+ });
+
+ if(Object.keys(counts).length){
+  const list=document.createElement("div");
+  list.className="reaction-list";
+
+  Object.entries(counts).forEach(([emoji,count])=>{
+   const chip=document.createElement("button");
+   chip.className="reaction-chip"+(reactions[me]===emoji?" mine":"");
+   chip.textContent=emoji;
+   const number=document.createElement("span");
+   number.textContent=count;
+   chip.appendChild(number);
+   chip.onclick=()=>toggleReaction(id,emoji);
+   list.appendChild(chip);
+  });
+  el.appendChild(list);
+ }
+
+ const panel=document.createElement("div");
+ panel.className="reaction-panel";
+
+ REACTIONS.forEach(emoji=>{
+  const btn=document.createElement("button");
+  btn.type="button";btn.textContent=emoji;
+  btn.onclick=()=>toggleReaction(id,emoji);
+  panel.appendChild(btn);
+ });
+ el.appendChild(panel);
+
+ const actions=document.createElement("div");
+ actions.className="message-actions";
+
+ const react=document.createElement("button");
+ react.textContent="☺ React";
+ react.onclick=()=>panel.classList.toggle("open");
+ actions.appendChild(react);
+
+ const reply=document.createElement("button");
+ reply.textContent="Reply";
+ reply.onclick=()=>replyMessage(id);
+ actions.appendChild(reply);
+
+ if(m.sender===me){
+  const del=document.createElement("button");
+  del.textContent="Delete";
+  del.onclick=()=>deleteMessage(id);
+  actions.appendChild(del);
+ }
+
+ el.appendChild(actions);
+
+ let pressTimer=null;
+ el.addEventListener("touchstart",()=>{
+  pressTimer=setTimeout(()=>panel.classList.add("open"),550);
+ },{passive:true});
+ ["touchend","touchmove","touchcancel"].forEach(name=>{
+  el.addEventListener(name,()=>clearTimeout(pressTimer),{passive:true});
+ });
+
+ return el;
+}
+
+/* DELETE FOR EVERYONE — RACE-SAFE */
+async function deleteMessage(id){
+ const message=currentMessages[id];
+
+ if(!message){
+  alert("This message is no longer available. Refresh the chat.");
+  return;
+ }
+
+ if(message.sender!==me){
+  alert("You can only delete your own messages.");
+  return;
+ }
+
+ if(message.deleted)return;
+
+ if(!confirm("Delete this message for everyone?"))return;
+
+ showUploadStatus("Deleting message…");
+
+ try{
+  const ref=messagesRef.child(id);
+
+  // Transaction prevents concurrent updates from restoring old content.
+  const result=await ref.transaction(current=>{
+   if(!current)return current;
+
+   return {
+    ...current,
+    deleted:true,
+    deletedAt:Date.now(),
+    text:null,
+    media:null,
+    mediaType:null,
+    mediaUrl:null,
+    imageUrl:null,
+    videoUrl:null,
+    url:null,
+    secure_url:null,
+    fileUrl:null,
+    attachment:null,
+    reply:null,
+    reactions:null
+   };
+  });
+
+  if(!result.committed||!result.snapshot.exists()||
+     !result.snapshot.val()?.deleted){
+   throw new Error("Firebase did not confirm the deletion.");
+  }
+
+  showUploadStatus("Message deleted for everyone.");
+  setTimeout(()=>showUploadStatus(""),2500);
+
+ }catch(error){
+  console.error("Message deletion error:",error);
+  showUploadStatus("Deletion failed: "+error.message,true);
+  alert("The message could not be deleted.\n\n"+error.message+
+   "\n\nCheck your Firebase database write permissions.");
+ }
+}
+
+/* REACTIONS */
+function toggleReaction(id,emoji){
+ const message=currentMessages[id];
+ if(!message||message.deleted)return;
+
+ const ref=messagesRef.child(id+"/reactions/"+me);
+ const current=message.reactions&&message.reactions[me];
+ const action=current===emoji?ref.remove():ref.set(emoji);
+
+ action.catch(e=>{
+  alert("Reaction failed: "+e.message);
+ });
+}
+
+/* SEND TEXT */
+async function sendMessage(){
+ const input=document.getElementById("messageInput");
+ const text=input.value;
+
+ if(!text.trim())return;
+
+ const message={
+  sender:me,text:text,
+  time:firebase.database.ServerValue.TIMESTAMP,
+  seenBy:{[me]:true}
+ };
+
+ if(replyTo)message.reply={id:replyTo.id,text:replyTo.text};
+
+ const button=document.getElementById("sendBtn");
+ button.disabled=true;
+
+ try{
+  await messagesRef.push(message);
+  input.value="";
+  input.style.height="auto";
+  cancelReply();
+  root.child("typing/"+me).set(false).catch(()=>{});
+  input.focus();
+ }catch(e){
+  alert("Message could not be sent: "+e.message);
+ }finally{
+  button.disabled=false;
+ }
+}
+
+function replyMessage(id){
+ const m=currentMessages[id];
+ if(!m||m.deleted)return;
+
+ replyTo={id,text:m.text||"Attachment"};
+ document.getElementById("replyText").textContent="Replying to: "+replyTo.text;
+ document.getElementById("replyBar").style.display="flex";
+ document.getElementById("messageInput").focus();
+}
+
+function cancelReply(){
+ replyTo=null;
+ document.getElementById("replyBar").style.display="none";
+}
+
+/* EMOJI */
+function insertText(value){
+ const input=document.getElementById("messageInput");
+ input.value+=value;
+ input.focus();
+ input.dispatchEvent(new Event("input"));
+}
+
+/* CLIPBOARD IMAGE PASTE */
+document.getElementById("messageInput").addEventListener("paste",async e=>{
+ const items=e.clipboardData&&e.clipboardData.items;
+ if(!items)return;
+
+ for(const item of items){
+  if(item.type&&item.type.startsWith("image/")){
+   const file=item.getAsFile();
+   if(file){
+    e.preventDefault();
+    await uploadMedia(file);
+   }
+   return;
+  }
+ }
+});
+
+/* DRAG AND DROP */
+const messageBox=document.getElementById("messages");
+messageBox.addEventListener("dragover",e=>e.preventDefault());
+messageBox.addEventListener("drop",async e=>{
+ e.preventDefault();
+ const files=[...e.dataTransfer.files].filter(file=>
+  file.type.startsWith("image/")||file.type.startsWith("video/")
+ );
+ for(const file of files)await uploadMedia(file);
+});
+
+/* CLOUDINARY */
+function cloudinaryUpload(file,onProgress=()=>{}){
+ return new Promise((resolve,reject)=>{
+  const cloudName="Tyler999";
+  const preset="our_cozy_corner";
+  const resourceType=file.type.startsWith("video/")?"video":"image";
+
+  const data=new FormData();
+  data.append("file",file);
+  data.append("upload_preset",preset);
+
+  const xhr=new XMLHttpRequest();
+  xhr.open("POST","https://api.cloudinary.com/v1_1/"+
+   cloudName+"/"+resourceType+"/upload");
+  xhr.timeout=180000;
+
+  xhr.upload.onprogress=e=>{
+   if(e.lengthComputable)onProgress(Math.round(e.loaded/e.total*100));
+  };
+
+  xhr.onload=()=>{
+   let result={};
+   try{result=JSON.parse(xhr.responseText||"{}")}catch(_){}
+
+   if(xhr.status>=200&&xhr.status<300&&result.secure_url){
+    resolve({url:result.secure_url,type:resourceType});
+   }else{
+    reject(new Error(result.error?.message||"Cloudinary HTTP "+xhr.status));
+   }
+  };
+
+  xhr.onerror=()=>reject(new Error("Network error contacting Cloudinary."));
+  xhr.ontimeout=()=>reject(new Error("Upload timed out. Try a smaller file."));
+  xhr.onabort=()=>reject(new Error("Upload cancelled."));
+  xhr.send(data);
+ });
+}
+
+function showUploadStatus(message,isError=false){
+ const el=document.getElementById("uploadStatus");
+ el.textContent=message;
+ el.classList.toggle("visible",!!message);
+ el.classList.toggle("error",!!isError);
+}
+
+/* MEDIA UPLOAD */
+async function uploadMedia(file){
+ if(!file||!me)return;
+
+ if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){
+  showUploadStatus("Please choose an image or video.",true);
+  return;
+ }
+
+ const input=document.getElementById("fileInput");
+ showUploadStatus("Preparing upload…");
+
+ try{
+  const result=await cloudinaryUpload(file,percent=>{
+   showUploadStatus("Uploading media… "+percent+"%");
+  });
+
+  showUploadStatus("Upload complete. Saving to chat…");
+
+  await messagesRef.push({
+   sender:me,
+   media:result.url,
+   mediaType:result.type,
+   time:firebase.database.ServerValue.TIMESTAMP,
+   seenBy:{[me]:true}
+  });
+
+  showUploadStatus("Media sent successfully.");
+  setTimeout(()=>showUploadStatus(""),3500);
+
+ }catch(e){
+  showUploadStatus("Upload/save failed: "+e.message,true);
+  alert("Couldn't send media:\n"+e.message);
+ }finally{
+  if(input)input.value="";
+ }
+}
+
+/* PROFILE EDITING */
+function editProfile(){
+ const p=profiles[me]||{};
+ profileImageURL=p.pic||null;
+
+ document.getElementById("profileName").value=p.name||"";
+ document.getElementById("profileUploadStatus").textContent="";
+ setAvatar("profilePreview",profileImageURL,p.name||LABELS[me]);
+ document.getElementById("profileModal").style.display="flex";
+}
+
+function closeProfile(){
+ document.getElementById("profileModal").style.display="none";
+}
+
+async function uploadProfilePicture(file){
+ if(!file)return;
+
+ const status=document.getElementById("profileUploadStatus");
+ status.textContent="Uploading picture…";
+
+ try{
+  const result=await cloudinaryUpload(file,percent=>{
+   status.textContent="Uploading picture… "+percent+"%";
+  });
+
+  profileImageURL=result.url;
+  setAvatar("profilePreview",profileImageURL,"Profile");
+  status.textContent="Picture uploaded. Save changes to apply.";
+
+ }catch(e){
+  status.textContent="Upload failed: "+e.message;
+ }
+
+ document.getElementById("pfpInput").value="";
+}
+
+async function saveProfile(){
+ const name=document.getElementById("profileName").value.trim();
+
+ try{
+  await profilesRef.child(me).set({
+   name:name||LABELS[me],
+   pic:profileImageURL||""
+  });
+  closeProfile();
+ }catch(e){
+  alert("Could not save profile: "+e.message);
+ }
+}
+
+/* TYPING INDICATOR */
+function listenTyping(){
+ root.child("typing/"+partner).off("value");
+ root.child("typing/"+partner).on("value",s=>{
+  document.getElementById("typing").textContent=s.val()?"Typing…":"";
+ });
+}
+
+document.getElementById("messageInput").addEventListener("input",function(){
+ if(!me)return;
+
+ root.child("typing/"+me).set(true).catch(()=>{});
+ clearTimeout(typingTimer);
+
+ typingTimer=setTimeout(()=>{
+  root.child("typing/"+me).set(false).catch(()=>{});
+ },1300);
+
+ this.style.height="auto";
+ this.style.height=Math.min(this.scrollHeight,140)+"px";
+});
+
+document.getElementById("messageInput").addEventListener("keydown",e=>{
+ if(e.key==="Enter"&&!e.shiftKey){
+  e.preventDefault();
+  sendMessage();
+ }
+});
+
+document.getElementById("pass").addEventListener("keydown",e=>{
+ if(e.key==="Enter")login();
+});
+
+/* RESTORE SESSION */
+const saved=sessionStorage.getItem("cozyIdentity");
+
+if(saved&&PASSCODES[saved]){
+ me=saved;
+ partner=me==="cat"?"wolf":"cat";
+ openChat();
+}
+</script>
+</body>
+</html>
